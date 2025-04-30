@@ -1,5 +1,5 @@
 [project]
-name = "examples-backend-fastapi"
+name = "example-backend-fastapi"
 version = "0.1.0"
 description = "An example backend Agent using FastAPI for the LayerCode Platform"
 readme = "README.md"

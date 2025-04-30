@@ -17,8 +17,18 @@ A lightweight Python service built with **FastAPI** that streams text-to-speech-
 
 ```bash
 # Clone and enter the repo
-$ git clone https://github.com/layercodedev/examples-backend-fastapi.git && cd examples-backend-fastapi
+$ git clone https://github.com/layercodedev/example-backend-fastapi.git && cd example-backend-fastapi
 
+
+### With uv
+# Installing uv
+$ curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create venv & install deps
+$ uv venv && source .venv/bin/activate
+$ uv pip install -r requirements.txt
+
+### With python
 # Create venv & install deps (optional but recommended)
 $ python -m venv .venv && source .venv/bin/activate
 $ pip install -r requirements.txt
