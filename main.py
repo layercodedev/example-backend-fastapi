@@ -1,6 +1,8 @@
 import os
 import json
-from fastapi import FastAPI
+import hmac
+import hashlib
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, AsyncGenerator
@@ -12,6 +14,26 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI()
+
+# Webhook signature verification
+def verify_signature(request_body: bytes, signature: str, secret: str) -> bool:
+    expected_signature = hmac.new(
+        secret.encode(),
+        request_body,
+        hashlib.sha256
+    ).hexdigest()
+    return hmac.compare_digest(signature, expected_signature)
+
+async def verify_webhook(request: Request):
+    signature = request.headers.get("layercode-signature")
+    if not signature:
+        raise HTTPException(status_code=401, detail="Missing signature header")
+    
+    body = await request.body()
+    if not verify_signature(body, signature, os.getenv("LAYERCODE_WEBHOOK_SECRET", "")):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+    
+    return body
 
 class MessageContent(BaseModel):
     type: str
@@ -69,7 +91,7 @@ async def stream_google_gemini(messages: List[Message], system_prompt: str) -> A
             yield chunk["text"]
 
 @app.post("/agent")
-async def agent_endpoint(body: RequestBody):
+async def agent_endpoint(body: RequestBody, verified_body: bytes = Depends(verify_webhook)):
     messages = session_messages.setdefault(body.session_id, [])
     # Add user message
     messages.append(Message(role="user", content=[MessageContent(type="text", text=body.text)]))

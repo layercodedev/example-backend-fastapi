@@ -10,6 +10,7 @@ A lightweight Python service built with **FastAPI** that streams text-to-speech-
 - **Real-time streaming** – incremental `response.tts` chunks delivered via SSE.
 - **Google Gemini SDK** (official `google-generativeai`) integration.
 - **Graceful fall-backs** – friendly responses on errors.
+- **Webhook signature verification** – secure endpoint access with HMAC SHA-256 signatures.
 
 ---
 
@@ -34,10 +35,10 @@ $ python -m venv .venv && source .venv/bin/activate
 $ pip install -r requirements.txt
 
 # Run (reload enabled for dev)
-$ uvicorn main:app --reload --env-file .env
+$ uvicorn main:app --reload --env-file .env --port 3001
 ```
 
-> Requires **Python 3.9+** and a valid **Gemini API key**.
+> Requires **Python 3.9+**, a valid **Gemini API key**, and a **webhook secret**.
 
 ---
 
@@ -47,6 +48,7 @@ Add a `.env` file or export env-vars:
 
 ```env
 GOOGLE_GENERATIVE_AI_API_KEY=your_api_key_here
+LAYERCODE_WEBHOOK_SECRET=your_webhook_secret_here
 PORT=8000   # Optional – FastAPI defaults to 8000
 ```
 
@@ -58,6 +60,12 @@ PORT=8000   # Optional – FastAPI defaults to 8000
 
 Send the user's text and receive streamed chunks.
 
+#### Request Headers
+
+| Header                | Description                                |
+| --------------------- | ------------------------------------------ |
+| `layercode-signature` | HMAC SHA-256 signature of the request body |
+
 #### Request JSON
 
 ```jsonc
@@ -68,6 +76,13 @@ Send the user's text and receive streamed chunks.
   "turn_id": "turn-0001"
 }
 ```
+
+#### Response Codes
+
+| Code | Description                          |
+| ---- | ------------------------------------ |
+| 200  | Success                              |
+| 401  | Missing or invalid webhook signature |
 
 #### Streaming Response (SSE)
 
@@ -110,6 +125,8 @@ All pinned in `requirements.txt` / `pyproject.toml`.
 | Symptom                                | Fix                               |
 | -------------------------------------- | --------------------------------- |
 | `GOOGLE_GENERATIVE_AI_API_KEY not set` | Export var or add to `.env`       |
+| `LAYERCODE_WEBHOOK_SECRET not set`     | Export var or add to `.env`       |
+| `401 Unauthorized`                     | Check webhook signature & secret  |
 | Blocking I/O warnings                  | Ensure `uvicorn --reload` for dev |
 | Empty or truncated response            | Check session consistency & logs  |
 
@@ -120,6 +137,7 @@ All pinned in `requirements.txt` / `pyproject.toml`.
 - Do **not** commit your `.env` / secrets.
 - Use HTTPS & proper auth in production.
 - Consider rate-limiting and persistence (e.g., Redis) for sessions.
+- Keep your webhook secret secure and rotate it periodically.
 
 ---
 
