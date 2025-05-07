@@ -2,6 +2,7 @@ import os
 import json
 import hmac
 import hashlib
+import time
 from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -16,21 +17,36 @@ load_dotenv()
 app = FastAPI()
 
 # Webhook signature verification
-def verify_signature(request_body: bytes, signature: str, secret: str) -> bool:
+def verify_signature(request_body: bytes, signature_header: str, secret: str, timestamp_tolerance: int = 300) -> bool:
+    # signature_header is expected in the format: t=timestamp,v1=signature
+    try:
+        parts = dict(item.split('=') for item in signature_header.split(','))
+        timestamp = int(parts['t'])
+        signature = parts['v1']
+    except Exception:
+        return False
+
+    # Check timestamp tolerance
+    now = int(time.time())
+    if abs(now - timestamp) > timestamp_tolerance:
+        return False
+
+    # Reconstruct signed payload
+    signed_payload = f"{timestamp}.{request_body.decode()}"
     expected_signature = hmac.new(
         secret.encode(),
-        request_body,
+        signed_payload.encode(),
         hashlib.sha256
     ).hexdigest()
     return hmac.compare_digest(signature, expected_signature)
 
 async def verify_webhook(request: Request):
-    signature = request.headers.get("layercode-signature")
-    if not signature:
+    signature_header = request.headers.get("layercode-signature")
+    if not signature_header:
         raise HTTPException(status_code=401, detail="Missing signature header")
     
     body = await request.body()
-    if not verify_signature(body, signature, os.getenv("LAYERCODE_WEBHOOK_SECRET", "")):
+    if not verify_signature(body, signature_header, os.getenv("LAYERCODE_WEBHOOK_SECRET", "")):
         raise HTTPException(status_code=401, detail="Invalid signature")
     
     return body
