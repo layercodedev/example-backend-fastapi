@@ -13,16 +13,16 @@ Read the companion guide: [FastAPI Backend Guide](https://docs.layercode.com/bac
 
 ## How It Works
 
-1. **Frontend:**  
+1. **Frontend:**
    See the [Layercode docs](https://docs.layercode.com) for details about connecting a Web Voice Agent frontend or Phone channel to the agent. This backend can also be tested our in the [Layercode Dashboard](https://dash.layercode.com) Playground
 
-2. **Transcription & Webhook:**  
+2. **Transcription & Webhook:**
    Layercode transcribes user speech. For each complete message, it sends a webhook containing the transcribed text to the /agent endpoint.
 
-3. **Backend Processing:**  
+3. **Backend Processing:**
    The transcribed text is sent to the LLM (Gemini Flash 2.0) to generate a response.
 
-4. **Streaming & Speech Synthesis:**  
+4. **Streaming & Speech Synthesis:**
    As soon as the LLM starts generating a response, the backend streams the output back as SSE messags to Layercode, which converts it to speech and delivers it to the frontend for playback in realtime.
 
 ## Getting Started
@@ -30,19 +30,6 @@ Read the companion guide: [FastAPI Backend Guide](https://docs.layercode.com/bac
 ```bash
 # Clone and enter the repo
 $ git clone https://github.com/layercodedev/example-backend-fastapi.git && cd example-backend-fastapi
-
-### With uv
-# Installing uv
-$ curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Create venv & install deps
-$ uv venv && source .venv/bin/activate
-$ uv pip install -r requirements.txt
-
-### With python
-# Create venv & install deps (optional but recommended)
-$ python -m venv .venv && source .venv/bin/activate
-$ pip install -r requirements.txt
 ```
 
 Edit your .env environment variables. You'll need to add:
@@ -54,10 +41,10 @@ If running locally, setup a tunnel (we recommend cloudflared which is free for d
 
 If you didn't follow the tunneling guide, and are deploying this example to the internet, remember to set the Webhook URL in the [Layercode dashboard](https://dash.layercode.com/) (click Edit in the Your Backend box) to your publically accessible backend URL.
 
-Now run the backend:
+Now run the backend (you'll need to have uv already installed):
 
 ```bash
-$ uvicorn main:app --reload --env-file .env --port 3000
+$ uv run uvicorn main:app --reload --env-file .env --port 3000
 ```
 
 The easiest way to talk to your agent is to use the [Layercode Dashboard](https://dash.layercode.com) Playground.
