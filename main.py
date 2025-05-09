@@ -4,17 +4,27 @@ import hmac
 import hashlib
 import time
 from fastapi import FastAPI, Request, HTTPException, Depends
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any, AsyncGenerator
 import asyncio
 import google.generativeai as genai
 from concurrent.futures import ThreadPoolExecutor
 from dotenv import load_dotenv
+import httpx
+from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Webhook signature verification
 def verify_signature(request_body: bytes, signature_header: str, secret: str, timestamp_tolerance: int = 300) -> bool:
@@ -149,3 +159,32 @@ async def agent_endpoint(body: RequestBody, verified_body: bytes = Depends(verif
         session_messages[body.session_id] = messages
 
     return StreamingResponse(streaming_and_save(), media_type="text/event-stream")
+
+@app.post("/authorize")
+async def authorize_endpoint(request: Request):
+    api_key = os.getenv("LAYERCODE_API_KEY")
+    if not api_key:
+        return JSONResponse({"error": "LAYERCODE_API_KEY is not set."}, status_code=500)
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"error": "Invalid JSON body."}, status_code=400)
+    if not body or not body.get("pipeline_id"):
+        return JSONResponse({"error": "Missing pipeline_id in request body."}, status_code=400)
+    endpoint = "https://api.layercode.com/v1/pipelines/authorize_session"
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                endpoint,
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {api_key}",
+                },
+                json=body,
+            )
+        if response.status_code != 200:
+            return JSONResponse({"error": response.text}, status_code=500)
+        return JSONResponse(response.json())
+    except Exception as error:
+        print("Layercode authorize session response error:", str(error))
+        return JSONResponse({"error": str(error)}, status_code=500)
