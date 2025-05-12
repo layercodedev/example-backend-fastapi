@@ -30,6 +30,13 @@ Read the companion guide: [FastAPI Backend Guide](https://docs.layercode.com/bac
 ```bash
 # Clone and enter the repo
 $ git clone https://github.com/layercodedev/example-backend-fastapi.git && cd example-backend-fastapi
+
+# Installing uv
+$ curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create venv & install deps
+$ uv venv && source .venv/bin/activate
+$ uv pip install -r pyproject.toml
 ```
 
 Edit your .env environment variables. You'll need to add:
