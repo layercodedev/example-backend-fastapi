@@ -169,9 +169,9 @@ async def authorize_endpoint(request: Request):
         body = await request.json()
     except Exception:
         return JSONResponse({"error": "Invalid JSON body."}, status_code=400)
-    if not body or not body.get("pipeline_id"):
-        return JSONResponse({"error": "Missing pipeline_id in request body."}, status_code=400)
-    endpoint = "https://api.layercode.com/v1/pipelines/authorize_session"
+    if not body or not body.get("agent_id"):
+        return JSONResponse({"error": "Missing agent_id in request body."}, status_code=400)
+    endpoint = "https://api.layercode.com/v1/agents/authorize_session"
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
