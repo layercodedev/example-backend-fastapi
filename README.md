@@ -1,6 +1,6 @@
 # Layercode Voice Agent Backend Example (FastAPI)
 
-This open source project demonstrates how to build a real-time voice agent using [Layercode](https://layercode.com) Voice Pipelines, with a FastAPI backend to drive the agent's responses.
+This open source project demonstrates how to build a real-time voice agent using [Layercode](https://layercode.com) Voice Agents, with a FastAPI backend to drive the agent's responses.
 
 Read the companion guide: [FastAPI Backend Guide](https://docs.layercode.com/backend-guides/fastapi)
 
@@ -42,7 +42,7 @@ $ uv pip install -r pyproject.toml
 Edit your .env environment variables. You'll need to add:
 
 - `GOOGLE_GENERATIVE_AI_API_KEY` - Your Google AI API key
-- `LAYERCODE_WEBHOOK_SECRET` - Your Layercode pipeline's webhook secret, found in the [Layercode dashboard](https://dash.layercode.com) (goto your pipeline, click Edit in the Your Backend Box and copy the webhook secret shown)
+- `LAYERCODE_WEBHOOK_SECRET` - Your Layercode agent's webhook secret, found in the [Layercode dashboard](https://dash.layercode.com) (goto your agent, click Edit in the Your Backend Box and copy the webhook secret shown)
 - `LAYERCODE_API_KEY` - Your Layercode API key found in the [Layercode dashboard settings](https://dash.layercode.com/settings)
 
 If running locally, setup a tunnel (we recommend cloudflared which is free for dev) to your localhost so the Layercode webhook can reach your backend. Follow our tunneling guide here: [https://docs.layercode.com/tunnelling](https://docs.layercode.com/tunnelling)
@@ -57,7 +57,7 @@ $ uv run uvicorn main:app --reload --env-file .env --port 3000
 
 The easiest way to talk to your agent is to use the [Layercode Dashboard](https://dash.layercode.com) Playground.
 
-Tip: If you don't hear any response from your voice agent, check the Webhook Logs tab in your pipeline in the [Layercode Dashboard](https://dash.layercode.com/) to see the response from your backend.
+Tip: If you don't hear any response from your voice agent, check the Webhook Logs tab in your agent in the [Layercode Dashboard](https://dash.layercode.com/) to see the response from your backend.
 
 ## License
 
