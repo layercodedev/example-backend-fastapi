@@ -160,7 +160,7 @@ async def agent_endpoint(body: RequestBody, verified_body: bytes = Depends(verif
 
     return StreamingResponse(streaming_and_save(), media_type="text/event-stream")
 
-@app.post("/authorize")
+@app.post("/api/authorize")
 async def authorize_endpoint(request: Request):
     api_key = os.getenv("LAYERCODE_API_KEY")
     if not api_key:
