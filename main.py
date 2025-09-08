@@ -116,7 +116,7 @@ async def stream_google_gemini(messages: List[Message], system_prompt: str) -> A
         elif isinstance(chunk, dict) and "text" in chunk:
             yield chunk["text"]
 
-@app.post("/agent")
+@app.post("/api/agent")
 async def agent_endpoint(body: RequestBody, verified_body: bytes = Depends(verify_webhook)):
     messages = session_messages.setdefault(body.session_id, [])
     # Add user message
