@@ -71,11 +71,22 @@ class Message(BaseModel):
 
 session_messages: Dict[str, List[Message]] = {}
 
-SYSTEM_PROMPT = (
-    "You are a helpful conversation assistant. You should respond to the user's message in a conversational manner. "
-    "Your output will be spoken by a TTS model. You should respond in a way that is easy for the TTS model to speak and sound natural."
+# Load prompt and welcome message from layercode.config.json
+try:
+    config_path = os.path.join(os.path.dirname(__file__), "layercode.config.json")
+    with open(config_path, "r") as config_file:
+        _layercode_config = json.load(config_file)
+except Exception:
+    _layercode_config = {}
+
+SYSTEM_PROMPT = _layercode_config.get(
+    "prompt",
+    "You are a helpful conversation assistant. You should respond to the user's message in a conversational manner. Your output will be spoken by a TTS model. You should respond in a way that is easy for the TTS model to speak and sound natural.",
 )
-WELCOME_MESSAGE = "Welcome to Layercode. How can I help you today?"
+WELCOME_MESSAGE = _layercode_config.get(
+    "welcome_message",
+    "Welcome to Layercode. How can I help you today?",
+)
 
 class RequestBody(BaseModel):
     text: str
